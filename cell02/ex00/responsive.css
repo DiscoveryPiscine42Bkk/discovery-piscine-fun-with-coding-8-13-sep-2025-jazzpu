@@ -1,0 +1,18 @@
+html, body {
+    height: 100%;
+    margin: 0;
+}
+td {
+        width: 50%;
+        border: black solid 1px;
+        border-collapse: collapse;
+}
+
+@media screen and (max-width: 600px) {
+    td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        margin-bottom: 10px;
+    }
+}
