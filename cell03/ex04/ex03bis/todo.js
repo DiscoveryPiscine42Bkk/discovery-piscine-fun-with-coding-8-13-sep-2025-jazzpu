@@ -1,60 +1,61 @@
-$(document).ready(function () {
-    // const list = document.getElementById("ft_list");
-    const $list = $('#ft_list');
-    let TodoList = [];
+window.onload = function() {
+      let saved = getCookie("todos");
+      if (saved) {
+        let todos = JSON.parse(saved);
+        todos.forEach(text => addTodo(text, false));
+      }
+    };
 
-    let save = getCookie('todoList');
-    if (save) {
-        TodoList = JSON.parse(decodeURIComponent(save));
-        render();
-    }
+document.getElementById("newBtn").addEventListener("click", function() {
+      let text = prompt("Enter new TO DO:");
+      if (text && text.trim() !== "") {
+        addTodo(text.trim(), true);
+      }
+    });
 
-    function addTask(taskText) {
-        const $taskDiv = $('<div></div>').addClass('task').text(taskText);
-        $taskDiv.on("click", function() {
-            const confirmDelete = confirm("Do you really want to remove this TO DO?");
-            if (confirmDelete) {
-                removeTask(taskText);
-            }
-        });
+function addTodo(text, save) {
+      let ft_list = document.getElementById("ft_list");
+      let div = document.createElement("div");
+      div.className = "todo";
+      div.textContent = text;
 
-        return $taskDiv;
-    }
-
-    function render() {
-        $list.empty();
-        for (let index = 0; index < TodoList.length; index++) {
-            const $taskDiv = addTask(TodoList[index]);
-            $list.append($taskDiv);
+      div.onclick = function() {
+        if (confirm("Do you want to remove this TO DO?")) {
+          ft_list.removeChild(div);
+          saveTodos();
         }
-        saveTasks();
+      };
+
+      ft_list.insertBefore(div, ft_list.firstChild);
+
+      if (save) saveTodos();
     }
 
-    function saveTasks() {
-        document.cookie = "todoList=" + encodeURIComponent(JSON.stringify(TodoList)) + "; path=/";
+    function saveTodos() {
+      let ft_list = document.getElementById("ft_list");
+      let todos = [];
+      for (let child of ft_list.children) {
+        todos.push(child.textContent);
+      }
+      setCookie("todos", JSON.stringify(todos), 7);
+    }
+
+    function setCookie(name, value, days) {
+      let d = new Date();
+      d.setTime(d.getTime() + (days*24*60*60*1000));
+      let expires = "expires="+ d.toUTCString();
+      document.cookie = name + "=" + value + ";" + expires + ";path=/";
     }
 
     function getCookie(name) {
-        const nameEQ = name + "=";
-        const ca = document.cookie.split(';');
-        for (let i = 0; i < ca.length; i++) {
-            let c = ca[i];
-            while (c.charAt(0) === ' ') c = c.substring(1);
-            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+      let cname = name + "=";
+      let decoded = decodeURIComponent(document.cookie);
+      let ca = decoded.split(';');
+      for(let c of ca) {
+        while (c.charAt(0) === ' ') c = c.substring(1);
+        if (c.indexOf(cname) === 0) {
+          return c.substring(cname.length, c.length);
         }
-        return null;
+      }
+      return "";
     }
-
-    $('#new').on('click', function () {
-        let name = prompt("Enter your TO DO:");
-        if (name) {
-            TodoList.unshift(name);
-            render();
-        }
-    });
-
-    function removeTask(taskText) {
-        TodoList = TodoList.filter(task => task !== taskText);
-        render();
-    }
-})
